@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CertifID - Hiring Scorecard</title>
+    <title>Hiring Scorecard</title>
     <link href="https://fonts.googleapis.com/css2?family=Oxygen:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -20937,8 +20937,7 @@ var __async = (__this, __arguments, generator) => {
     <div class="page">
         <!-- Top Bar -->
         <div class="top-bar">
-            <span class="logo">CertifID</span>
-            <span class="subtitle">Hiring Scorecard</span>
+            <span class="logo">Hiring Scorecard</span>
         </div>
 
         <!-- Header Band -->
@@ -21026,7 +21025,7 @@ var __async = (__this, __arguments, generator) => {
 
             <div class="outcome-row">
                 <div class="outcome-number">2</div>
-                <div contenteditable="true" id="outcome-text-2" class="outcome-text">Build multi-threaded relationships including C-suite - lead EBRs that connect CertifID's value to customer strategy</div>
+                <div contenteditable="true" id="outcome-text-2" class="outcome-text">Build multi-threaded relationships including C-suite - lead EBRs that connect product value to customer strategy</div>
                 <div class="rating-group" data-name="outcome-2">
                     <button class="rating-btn" data-val="1">1</button>
                     <button class="rating-btn" data-val="2">2</button>
@@ -21037,7 +21036,7 @@ var __async = (__this, __arguments, generator) => {
 
             <div class="outcome-row">
                 <div class="outcome-number">3</div>
-                <div contenteditable="true" id="outcome-text-3" class="outcome-text">Drive measurable product adoption - embed CertifID into workflows via proactive change management</div>
+                <div contenteditable="true" id="outcome-text-3" class="outcome-text">Drive measurable product adoption - embed the product into workflows via proactive change management</div>
                 <div class="rating-group" data-name="outcome-3">
                     <button class="rating-btn" data-val="1">1</button>
                     <button class="rating-btn" data-val="2">2</button>
@@ -21377,7 +21376,7 @@ var __async = (__this, __arguments, generator) => {
 
     <script>
         var currentTab = 0;
-        var TAB_KEY = 'certifid_scorecard_tabs';
+        var TAB_KEY = 'scorecard_tabs';
         var saveDebounceTimer = null;
 
         function getTabStore() {
@@ -21471,7 +21470,7 @@ var __async = (__this, __arguments, generator) => {
                 t.classList.toggle('active', i === idx);
             });
             updateTabIndicators();
-            sessionStorage.setItem('certifid_scorecard_activeTab', idx);
+            sessionStorage.setItem('scorecard_activeTab', idx);
         }
 
         function updateTabIndicators() {
@@ -21711,7 +21710,7 @@ var __async = (__this, __arguments, generator) => {
 
             // ── Build document ───────────────────────────────────────────
             var children = [
-                new Paragraph({ children: [new TextRun({ text: 'CertifID \u2014 Hiring Scorecard', bold: true, size: 24, font: 'Calibri', color: '102754', allCaps: true })] }),
+                new Paragraph({ children: [new TextRun({ text: 'Hiring Scorecard', bold: true, size: 24, font: 'Calibri', color: '102754', allCaps: true })] }),
                 new Paragraph({ children: [new TextRun({ text: roleTitle, bold: true, size: 44, font: 'Calibri', color: '166EBE' })] }),
                 new Paragraph({ children: [
                     new TextRun({ text: (dept ? dept + '  \u00B7  ' : '') + (scoreDate ? 'Date: ' + scoreDate : '') + (hiringMgr ? '  \u00B7  HM: ' + hiringMgr : '') + '  \u00B7  ' + currentTabLabel,
@@ -21801,7 +21800,7 @@ var __async = (__this, __arguments, generator) => {
 
             Packer.toBlob(doc).then(function(blob) {
                 var safe = roleTitle.replace(/[^a-zA-Z0-9\s\-]/g, '').replace(/\s+/g, '-');
-                var filename = 'CertifID-Scorecard-' + safe + '-' + currentTabLabel.replace(' ', '') + '.docx';
+                var filename = 'Scorecard-' + safe + '-' + currentTabLabel.replace(' ', '') + '.docx';
                 var url = URL.createObjectURL(blob);
                 var a = document.createElement('a');
                 a.href = url; a.download = filename;
@@ -21957,7 +21956,7 @@ var __async = (__this, __arguments, generator) => {
             var sections = {};
             var headerPatterns = [
                 { key: 'title',    re: /^(?:job\s*opening|position|role\s*title)\s*[:\-]/im },
-                { key: 'about',    re: /^(?:about\s+(?:us|certifid|the\s+company))\s*[:\n]/im },
+                { key: 'about',    re: /^(?:about\s+(?:us|the\s+company))\s*[:\n]/im },
                 { key: 'impact',   re: /^(?:how\s+you\s+will\s+make\s+an?\s+impact|about\s+the\s+role|role\s+summary|the\s+role|overview)\s*[:\n]/im },
                 { key: 'do',       re: /^(?:what\s+you(?:[\u2019']ll|.will)\s+do|responsibilities|key\s+responsibilities|your\s+responsibilities)\s*[:\n]/im },
                 { key: 'looking',  re: /^(?:what\s+we(?:[\u2019']re|.are)\s+looking\s+for|requirements|qualifications|what\s+you(?:[\u2019']ll|.will)\s+bring|who\s+you\s+are)\s*[:\n]/im },
@@ -22137,7 +22136,7 @@ var __async = (__this, __arguments, generator) => {
 
         // Init
         document.addEventListener('DOMContentLoaded', function() {
-            var savedTab = sessionStorage.getItem('certifid_scorecard_activeTab');
+            var savedTab = sessionStorage.getItem('scorecard_activeTab');
             if (savedTab) {
                 currentTab = parseInt(savedTab, 10);
                 var tabs = document.querySelectorAll('.tab-bar .tab');
