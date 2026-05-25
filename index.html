@@ -20928,8 +20928,10 @@ var __async = (__this, __arguments, generator) => {
             <button class="btn" onclick="openJDModal()">Load JD</button>
             <button class="btn" onclick="clearAndReset()">Clear & Reset</button>
             <button class="btn primary" onclick="downloadDocx()">⬇ Download DOCX</button>
+            <button class="btn primary" id="submitBtn" onclick="submitScorecard()">✓ Submit</button>
         </div>
     </div>
+    <div id="submitStatus" style="padding:0 40px 12px;font-size:13px;color:#5A6472;min-height:18px;text-align:right;"></div>
 
     <!-- Main Page -->
     <div class="page">
@@ -20958,6 +20960,14 @@ var __async = (__this, __arguments, generator) => {
                         <option value="Product">Product</option>
                         <option value="Sales">Sales</option>
                     </select>
+                </div>
+                <div class="header-field">
+                    <label>Candidate Name</label>
+                    <div contenteditable="true" id="candidateName" class="header-field-input"></div>
+                </div>
+                <div class="header-field">
+                    <label>Interviewer Name</label>
+                    <div contenteditable="true" id="interviewerName" class="header-field-input"></div>
                 </div>
             </div>
             <div class="legend">
@@ -21801,6 +21811,133 @@ var __async = (__this, __arguments, generator) => {
                 console.error(e);
                 alert('DOCX generation failed — see console for details.');
             });
+        }
+
+
+        async function submitScorecard() {
+            var statusEl = document.getElementById('submitStatus');
+            var btn = document.getElementById('submitBtn');
+
+            var roleTitle   = (document.getElementById('roleTitle')        || {}).innerText || '';
+            var dept        = (document.getElementById('department')       || {}).value     || '';
+            var candidate   = (document.getElementById('candidateName')    || {}).innerText || '';
+            var interviewer = (document.getElementById('interviewerName')  || {}).innerText || '';
+            var hiringMgr   = (document.getElementById('hiringManager')    || {}).innerText || '';
+            var scoreDate   = (document.getElementById('scoreDate')        || {}).value     || '';
+            var mission     = (document.getElementById('mission')          || {}).innerText || '';
+
+            if (!candidate.trim()) {
+                statusEl.textContent = 'Please enter a Candidate Name before submitting.';
+                statusEl.style.color = '#DB132C';
+                return;
+            }
+
+            function ratingLabel(r) {
+                if (r === '1') return '1 - Strong No';
+                if (r === '2') return '2 - No';
+                if (r === '3') return '3 - Yes';
+                if (r === '4') return '4 - Strong Yes';
+                return 'Not rated';
+            }
+            function getRating(name) {
+                var grp = document.querySelector('.rating-group[data-name="' + name + '"]');
+                var active = grp ? grp.querySelector('.rating-btn.active') : null;
+                return active ? active.dataset.val : '';
+            }
+
+            var lines = [];
+            lines.push('HIRING SCORECARD');
+            lines.push('================');
+            lines.push('Candidate:       ' + candidate);
+            lines.push('Interviewer:     ' + interviewer);
+            lines.push('Role:            ' + roleTitle);
+            lines.push('Department:      ' + dept);
+            lines.push('Hiring Manager:  ' + hiringMgr);
+            lines.push('Date:            ' + scoreDate);
+            lines.push('');
+            lines.push('MISSION');
+            lines.push('-------');
+            lines.push(mission || '(none)');
+            lines.push('');
+            lines.push('OUTCOMES');
+            lines.push('--------');
+            for (var i = 1; i <= 6; i++) {
+                var oText = (document.getElementById('outcome-text-' + i) || {}).innerText || '';
+                lines.push(i + '. [' + ratingLabel(getRating('outcome-' + i)) + '] ' + oText);
+            }
+            lines.push('');
+
+            var groups = [
+                { label: 'PRIORITIES', prefix: 'p' },
+                { label: 'WHO',        prefix: 'w' },
+                { label: 'VALUES',     prefix: 'v' },
+                { label: 'TECHNICAL',  prefix: 't' }
+            ];
+            groups.forEach(function(grp) {
+                lines.push('COMPETENCIES — ' + grp.label);
+                lines.push('-----------------------');
+                for (var j = 1; j <= 5; j++) {
+                    var cId = 'comp-' + grp.prefix + j;
+                    var cText = (document.getElementById(cId + '-label') || {}).innerText || '';
+                    lines.push('  [' + ratingLabel(getRating(cId)) + '] ' + cText);
+                }
+                lines.push('');
+            });
+
+            lines.push('INTERVIEW PLAN');
+            lines.push('--------------');
+            document.querySelectorAll('[id^="ip-owner-"]').forEach(function(ownerEl) {
+                var idx = ownerEl.id.replace('ip-owner-', '');
+                var focusEl = document.getElementById('ip-focus-' + idx);
+                var owner = ownerEl.innerText || '';
+                var focus = focusEl ? (focusEl.innerText || '') : '';
+                lines.push('Stage ' + idx + ' | Owner: ' + owner + ' | Focus: ' + focus);
+            });
+
+            var summary = lines.join('\n');
+
+            var rawJson = '';
+            try { rawJson = JSON.stringify(serializeScorecard(), null, 2); }
+            catch (e) { rawJson = '(serialization failed: ' + e.message + ')'; }
+
+            var payload = {
+                _subject: 'Scorecard: ' + candidate + ' — ' + (roleTitle || 'Untitled Role'),
+                candidate: candidate,
+                interviewer: interviewer,
+                role_title: roleTitle,
+                department: dept,
+                hiring_manager: hiringMgr,
+                date: scoreDate,
+                summary: summary,
+                raw_json: rawJson
+            };
+
+            btn.disabled = true;
+            statusEl.textContent = 'Submitting…';
+            statusEl.style.color = '#5A6472';
+
+            try {
+                var res = await fetch('https://formspree.io/f/meedrgqk', {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    statusEl.textContent = '✓ Scorecard submitted successfully.';
+                    statusEl.style.color = '#1B9D5F';
+                } else {
+                    var data = {};
+                    try { data = await res.json(); } catch (e) {}
+                    var msg = (data && data.errors && data.errors[0] && data.errors[0].message) || ('Submission failed (HTTP ' + res.status + ')');
+                    statusEl.textContent = '✗ ' + msg;
+                    statusEl.style.color = '#DB132C';
+                }
+            } catch (err) {
+                statusEl.textContent = '✗ Network error: ' + err.message;
+                statusEl.style.color = '#DB132C';
+            } finally {
+                btn.disabled = false;
+            }
         }
 
 
